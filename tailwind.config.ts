@@ -14,7 +14,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ["system-ui", "sans-serif"],
+        display: ["var(--font-fredoka)", "system-ui", "sans-serif"],
       },
     },
   },

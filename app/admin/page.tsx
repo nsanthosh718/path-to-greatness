@@ -171,7 +171,7 @@ export default function AdminPage() {
   return (
     <div className="space-y-10 pb-16">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-1">⚙️ Parent Admin</h1>
+        <h1 className="text-2xl sm:text-3xl font-display font-extrabold text-slate-900 mb-1">⚙️ Parent Admin</h1>
         <p className="text-slate-400">Edit names, the daily schedule, chores, and rewards. Changes sync live.</p>
       </div>
 

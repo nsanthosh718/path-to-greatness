@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import { Fredoka } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
+
+const fredoka = Fredoka({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-fredoka",
+});
 
 export const metadata: Metadata = {
   title: "FamilyBoard",
@@ -9,12 +16,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={fredoka.variable}>
       <body>
         <div className="min-h-screen flex flex-col">
           <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
             <nav className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-2 sm:gap-4 overflow-x-auto">
-              <Link href="/" className="text-lg font-bold text-brand-600 whitespace-nowrap mr-2">
+              <Link href="/" className="text-lg font-display font-bold text-brand-600 whitespace-nowrap mr-2">
                 🏠 FamilyBoard
               </Link>
               <Link

@@ -17,6 +17,22 @@ Supabase.
 - **Parent Admin** (`/admin`) — edit names, the daily schedule, chores, and
   rewards. No separate login — it's meant for a trusted home network.
 
+## Made for kids to love
+
+- **Sunny** — a hand-animated mascot (plain SVG + Framer Motion, no external
+  Lottie/CDN asset) that waves hello, bobs idly, and jumps for joy when a kid
+  finishes their chores or redeems a reward. Fully offline-safe, since a wall
+  tablet shouldn't depend on a CDN staying up.
+- **Confetti** (`canvas-confetti`) — a small burst right where a kid tapped
+  when they check off a chore, and a big two-corner celebration when they
+  finish *everything* for the day or redeem a reward.
+- **Springy motion everywhere** (`framer-motion`) — bouncy checkboxes, a
+  staggered card entrance on every page, a pulsing glow around the "Now"
+  activity, a shake if you tap a reward you can't afford yet, and a soft
+  fade between pages.
+- **Fredoka** — a playful, rounded Google Font (self-hosted via
+  `next/font`, no runtime CDN dependency) used for headings and buttons.
+
 Everything updates live: when a kid checks off a chore on the wall tablet, the
 point balance and rewards store update instantly on your phone too, via
 Supabase Realtime.

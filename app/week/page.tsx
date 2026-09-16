@@ -1,10 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, Variants } from "framer-motion";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { formatTime, timeToMinutes } from "@/lib/date";
 import { DAY_NAMES_LONG, FamilyMember, ScheduleItem } from "@/lib/types";
 import SetupNotice from "@/components/SetupNotice";
+
+const columnVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+
+const dayVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 24 } },
+};
 
 export default function WeekPage() {
   const [members, setMembers] = useState<FamilyMember[]>([]);
@@ -40,7 +51,13 @@ export default function WeekPage() {
 
   return (
     <div>
-      <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-1">📅 This Week</h1>
+      <motion.h1
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-2xl sm:text-3xl font-display font-extrabold text-slate-900 mb-1"
+      >
+        📅 This Week
+      </motion.h1>
       <p className="text-slate-400 mb-6">The whole family&apos;s schedule at a glance.</p>
 
       <div className="flex gap-4 mb-4 flex-wrap">
@@ -52,7 +69,12 @@ export default function WeekPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-7 gap-3 overflow-x-auto">
+      <motion.div
+        variants={columnVariants}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 sm:grid-cols-7 gap-3 overflow-x-auto"
+      >
         {DAY_NAMES_LONG.map((name, dow) => {
           const dayItems = items
             .filter((i) => i.days_of_week.includes(dow))
@@ -60,13 +82,24 @@ export default function WeekPage() {
           const isToday = dow === today;
 
           return (
-            <div
+            <motion.div
               key={dow}
-              className={`rounded-2xl border p-3 min-w-[220px] ${
+              variants={dayVariants}
+              whileHover={{ y: -3 }}
+              className={`relative rounded-2xl border p-3 min-w-[220px] ${
                 isToday ? "bg-brand-50 border-brand-300" : "bg-white border-slate-200"
               }`}
             >
-              <p className={`font-bold mb-2 ${isToday ? "text-brand-700" : "text-slate-700"}`}>
+              {isToday && (
+                <motion.div
+                  className="absolute inset-0 rounded-2xl pointer-events-none"
+                  animate={{
+                    boxShadow: ["0 0 0 0px rgba(14,165,233,0.3)", "0 0 0 6px rgba(14,165,233,0)"],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              )}
+              <p className={`font-display font-bold mb-2 ${isToday ? "text-brand-700" : "text-slate-700"}`}>
                 {name}
                 {isToday && <span className="ml-1 text-xs font-medium">(today)</span>}
               </p>
@@ -90,10 +123,10 @@ export default function WeekPage() {
                 })}
                 {dayItems.length === 0 && <li className="text-slate-300 text-xs">Nothing scheduled</li>}
               </ul>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </div>
   );
 }
