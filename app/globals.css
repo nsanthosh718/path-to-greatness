@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 antialiased;
+}
+
+/* Large touch targets for a kitchen-wall tablet. */
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
