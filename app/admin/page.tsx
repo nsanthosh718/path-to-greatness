@@ -45,22 +45,30 @@ export default function AdminPage() {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeMemberId, setActiveMemberId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
 
     async function load() {
-      const [{ data: m }, { data: s }, { data: c }, { data: r }] = await Promise.all([
+      const [membersRes, scheduleRes, choresRes, rewardsRes] = await Promise.all([
         supabase.from("family_members").select("*").order("sort_order"),
         supabase.from("schedule_items").select("*").order("start_time"),
         supabase.from("chores").select("*").order("sort_order"),
         supabase.from("rewards").select("*").order("points_cost"),
       ]);
-      setMembers((m as FamilyMember[]) ?? []);
-      setScheduleItems((s as ScheduleItem[]) ?? []);
-      setChores((c as Chore[]) ?? []);
-      setRewards((r as Reward[]) ?? []);
-      setActiveMemberId((prev) => prev ?? (m as FamilyMember[])?.[0]?.id ?? null);
+      const firstError =
+        membersRes.error || scheduleRes.error || choresRes.error || rewardsRes.error;
+      if (firstError) {
+        setError(
+          `Couldn't load data from Supabase: ${firstError.message}. Did you run both supabase/schema.sql and supabase/seed.sql?`
+        );
+      }
+      setMembers(membersRes.data ?? []);
+      setScheduleItems(scheduleRes.data ?? []);
+      setChores(choresRes.data ?? []);
+      setRewards(rewardsRes.data ?? []);
+      setActiveMemberId((prev) => prev ?? membersRes.data?.[0]?.id ?? null);
       setLoading(false);
     }
 
@@ -75,22 +83,28 @@ export default function AdminPage() {
   // --- Family members -------------------------------------------------
   async function saveMember(id: string, patch: Partial<FamilyMember>) {
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
-    await supabase.from("family_members").update(patch).eq("id", id);
+    const { error } = await supabase.from("family_members").update(patch).eq("id", id);
+    setError(error ? `Couldn't save that change: ${error.message}` : null);
   }
 
   async function addKid() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("family_members")
       .insert({ slug: `kid-${Date.now()}`, name: "New Kid", age: 8, role: "kid", avatar_emoji: "🙂", color: "#a3a3a3", sort_order: members.length + 1 })
       .select()
       .single();
-    if (data) setMembers((prev) => [...prev, data as FamilyMember]);
+    if (error) {
+      setError(`Couldn't add family member: ${error.message}`);
+      return;
+    }
+    setError(null);
+    setMembers((prev) => [...prev, data as FamilyMember]);
   }
 
   // --- Schedule items ---------------------------------------------------
   async function addScheduleItem() {
     if (!activeMember) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("schedule_items")
       .insert({
         family_member_id: activeMember.id,
@@ -104,23 +118,30 @@ export default function AdminPage() {
       })
       .select()
       .single();
-    if (data) setScheduleItems((prev) => [...prev, data as ScheduleItem]);
+    if (error) {
+      setError(`Couldn't add schedule item: ${error.message}`);
+      return;
+    }
+    setError(null);
+    setScheduleItems((prev) => [...prev, data as ScheduleItem]);
   }
 
   async function updateScheduleItem(id: string, patch: Partial<ScheduleItem>) {
     setScheduleItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
-    await supabase.from("schedule_items").update(patch).eq("id", id);
+    const { error } = await supabase.from("schedule_items").update(patch).eq("id", id);
+    setError(error ? `Couldn't save that change: ${error.message}` : null);
   }
 
   async function deleteScheduleItem(id: string) {
     setScheduleItems((prev) => prev.filter((i) => i.id !== id));
-    await supabase.from("schedule_items").delete().eq("id", id);
+    const { error } = await supabase.from("schedule_items").delete().eq("id", id);
+    setError(error ? `Couldn't delete that item: ${error.message}` : null);
   }
 
   // --- Chores -------------------------------------------------------------
   async function addChore() {
     if (!activeMember) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("chores")
       .insert({
         family_member_id: activeMember.id,
@@ -132,37 +153,51 @@ export default function AdminPage() {
       })
       .select()
       .single();
-    if (data) setChores((prev) => [...prev, data as Chore]);
+    if (error) {
+      setError(`Couldn't add chore: ${error.message}`);
+      return;
+    }
+    setError(null);
+    setChores((prev) => [...prev, data as Chore]);
   }
 
   async function updateChore(id: string, patch: Partial<Chore>) {
     setChores((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
-    await supabase.from("chores").update(patch).eq("id", id);
+    const { error } = await supabase.from("chores").update(patch).eq("id", id);
+    setError(error ? `Couldn't save that change: ${error.message}` : null);
   }
 
   async function deleteChore(id: string) {
     setChores((prev) => prev.filter((c) => c.id !== id));
-    await supabase.from("chores").delete().eq("id", id);
+    const { error } = await supabase.from("chores").delete().eq("id", id);
+    setError(error ? `Couldn't delete that chore: ${error.message}` : null);
   }
 
   // --- Rewards --------------------------------------------------------------
   async function addReward() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("rewards")
       .insert({ title: "New Reward", icon: "🎁", points_cost: 50, family_member_id: null })
       .select()
       .single();
-    if (data) setRewards((prev) => [...prev, data as Reward]);
+    if (error) {
+      setError(`Couldn't add reward: ${error.message}`);
+      return;
+    }
+    setError(null);
+    setRewards((prev) => [...prev, data as Reward]);
   }
 
   async function updateReward(id: string, patch: Partial<Reward>) {
     setRewards((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
-    await supabase.from("rewards").update(patch).eq("id", id);
+    const { error } = await supabase.from("rewards").update(patch).eq("id", id);
+    setError(error ? `Couldn't save that change: ${error.message}` : null);
   }
 
   async function deleteReward(id: string) {
     setRewards((prev) => prev.filter((r) => r.id !== id));
-    await supabase.from("rewards").delete().eq("id", id);
+    const { error } = await supabase.from("rewards").delete().eq("id", id);
+    setError(error ? `Couldn't delete that reward: ${error.message}` : null);
   }
 
   const memberSchedule = scheduleItems.filter((i) => i.family_member_id === activeMemberId);
@@ -174,6 +209,15 @@ export default function AdminPage() {
         <h1 className="text-2xl sm:text-3xl font-display font-extrabold text-slate-900 mb-1">⚙️ Parent Admin</h1>
         <p className="text-slate-400">Edit names, the daily schedule, chores, and rewards. Changes sync live.</p>
       </div>
+
+      {error && (
+        <div className="flex items-start justify-between gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">
+          <span>⚠️ {error}</span>
+          <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600 font-bold shrink-0">
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Family members */}
       <section>
