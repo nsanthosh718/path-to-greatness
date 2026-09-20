@@ -89,13 +89,12 @@ with kid as (select id from family_members where slug = 'aadhi')
 insert into schedule_items (family_member_id, days_of_week, start_time, end_time, title, icon, category, sort_order)
 select kid.id, days, start_time, end_time, title, icon, category, sort_order
 from kid, (values
-  ('{1,2,3,4,5}'::int[], '06:30'::time, '07:00'::time, 'Wake Up', '🌞', 'routine', 1),
-  ('{1,2,3,4,5}', '07:00', '07:30', 'Breakfast', '🥣', 'meal', 2),
-  ('{1,2,3,4,5}', '07:30', '08:00', 'Get Ready & Pack Backpack', '🎒', 'routine', 3),
-  ('{1,2,3,4,5}', '08:00', '15:00', 'School', '🏫', 'school', 4),
-  ('{1,2,3,4,5}', '15:00', '15:30', 'Snack & Unwind', '🍎', 'meal', 5),
-  ('{1,2,3,4,5}', '15:30', '16:00', 'Chores', '🧹', 'chore', 6),
-  ('{1,2,3,4,5}', '16:00', '17:00', 'Homework', '✏️', 'school', 7),
+  ('{1,2,3,4,5}'::int[], '06:15'::time, '06:50'::time, 'Wake Up & Get Ready for Bus', '🌞', 'routine', 1),
+  ('{1,2,3,4,5}', '06:50', '14:35', 'School', '🏫', 'school', 4),
+  ('{1,2,3,4,5}', '14:35', '15:00', 'Snack & Unwind', '🍎', 'meal', 5),
+  ('{1,2,3,4,5}', '15:00', '15:30', 'Chores', '🧹', 'chore', 6),
+  ('{1,2,3,4,5}', '15:30', '16:30', 'Homework', '✏️', 'school', 7),
+  ('{1,2,3,4,5}', '16:30', '17:00', 'Free Time', '🎮', 'play', 7),
   ('{1}', '17:00', '18:00', 'Soccer: Home Session A', '⚽', 'play', 8),
   ('{2}', '17:00', '18:00', 'Soccer: Club Practice', '⚽', 'play', 8),
   ('{3}', '17:00', '18:00', 'Soccer: Home Session B', '⚽', 'play', 8),
@@ -267,7 +266,7 @@ update schedule_items si set voice_line = v.voice_line
 from kid, (values
   ('Wake Up', 'Good morning, champ! Time to get up and start the day.'),
   ('Breakfast', 'Breakfast time! Fuel up for the day ahead.'),
-  ('Get Ready & Pack Backpack', 'Time to get ready and pack your backpack for school.'),
+  ('Wake Up & Get Ready for Bus', 'Good morning, champ! Time to get up and get ready for the school bus.'),
   ('School', 'Off to school! Have a great day.'),
   ('Snack & Unwind', 'Welcome home! Grab a snack and take a breather.'),
   ('Chores', 'Time to knock out your chores.'),
