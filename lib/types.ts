@@ -20,6 +20,7 @@ export interface ScheduleItem {
   title: string;
   icon: string;
   category: Category;
+  voice_line: string | null;
   sort_order: number;
 }
 
@@ -30,6 +31,7 @@ export interface Chore {
   icon: string;
   points: number;
   days_of_week: number[];
+  voice_line: string | null;
   sort_order: number;
 }
 

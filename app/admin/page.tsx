@@ -280,44 +280,52 @@ export default function AdminPage() {
           <h2 className="text-lg font-bold text-slate-800 mb-3">{activeMember.name}&apos;s Schedule</h2>
           <div className="space-y-2">
             {memberSchedule.map((item) => (
-              <div key={item.id} className="flex flex-wrap items-center gap-2 bg-white border border-slate-200 rounded-xl p-3">
+              <div key={item.id} className="bg-white border border-slate-200 rounded-xl p-3 space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    value={item.icon}
+                    onChange={(e) => updateScheduleItem(item.id, { icon: e.target.value })}
+                    className="w-10 text-center border border-slate-200 rounded-lg py-1"
+                  />
+                  <input
+                    value={item.title}
+                    onChange={(e) => updateScheduleItem(item.id, { title: e.target.value })}
+                    className="flex-1 min-w-[140px] border border-slate-200 rounded-lg px-2 py-1"
+                  />
+                  <input
+                    type="time"
+                    value={item.start_time.slice(0, 5)}
+                    onChange={(e) => updateScheduleItem(item.id, { start_time: e.target.value })}
+                    className="border border-slate-200 rounded-lg px-2 py-1"
+                  />
+                  <input
+                    type="time"
+                    value={item.end_time.slice(0, 5)}
+                    onChange={(e) => updateScheduleItem(item.id, { end_time: e.target.value })}
+                    className="border border-slate-200 rounded-lg px-2 py-1"
+                  />
+                  <select
+                    value={item.category}
+                    onChange={(e) => updateScheduleItem(item.id, { category: e.target.value as Category })}
+                    className="border border-slate-200 rounded-lg px-2 py-1"
+                  >
+                    {CATEGORIES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                  <DayToggles days={item.days_of_week} onChange={(days) => updateScheduleItem(item.id, { days_of_week: days })} />
+                  <button onClick={() => deleteScheduleItem(item.id)} className="text-red-500 text-sm ml-auto">
+                    Delete
+                  </button>
+                </div>
                 <input
-                  value={item.icon}
-                  onChange={(e) => updateScheduleItem(item.id, { icon: e.target.value })}
-                  className="w-10 text-center border border-slate-200 rounded-lg py-1"
+                  value={item.voice_line ?? ""}
+                  onChange={(e) => updateScheduleItem(item.id, { voice_line: e.target.value || null })}
+                  placeholder="🔊 Voice line read aloud (blank = reads the title instead)"
+                  className="w-full border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-600"
                 />
-                <input
-                  value={item.title}
-                  onChange={(e) => updateScheduleItem(item.id, { title: e.target.value })}
-                  className="flex-1 min-w-[140px] border border-slate-200 rounded-lg px-2 py-1"
-                />
-                <input
-                  type="time"
-                  value={item.start_time.slice(0, 5)}
-                  onChange={(e) => updateScheduleItem(item.id, { start_time: e.target.value })}
-                  className="border border-slate-200 rounded-lg px-2 py-1"
-                />
-                <input
-                  type="time"
-                  value={item.end_time.slice(0, 5)}
-                  onChange={(e) => updateScheduleItem(item.id, { end_time: e.target.value })}
-                  className="border border-slate-200 rounded-lg px-2 py-1"
-                />
-                <select
-                  value={item.category}
-                  onChange={(e) => updateScheduleItem(item.id, { category: e.target.value as Category })}
-                  className="border border-slate-200 rounded-lg px-2 py-1"
-                >
-                  {CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-                <DayToggles days={item.days_of_week} onChange={(days) => updateScheduleItem(item.id, { days_of_week: days })} />
-                <button onClick={() => deleteScheduleItem(item.id)} className="text-red-500 text-sm ml-auto">
-                  Delete
-                </button>
               </div>
             ))}
             <button onClick={addScheduleItem} className="text-brand-600 font-medium text-sm">
@@ -333,28 +341,36 @@ export default function AdminPage() {
           <h2 className="text-lg font-bold text-slate-800 mb-3">{activeMember.name}&apos;s Chores</h2>
           <div className="space-y-2">
             {memberChores.map((chore) => (
-              <div key={chore.id} className="flex flex-wrap items-center gap-2 bg-white border border-slate-200 rounded-xl p-3">
+              <div key={chore.id} className="bg-white border border-slate-200 rounded-xl p-3 space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    value={chore.icon}
+                    onChange={(e) => updateChore(chore.id, { icon: e.target.value })}
+                    className="w-10 text-center border border-slate-200 rounded-lg py-1"
+                  />
+                  <input
+                    value={chore.title}
+                    onChange={(e) => updateChore(chore.id, { title: e.target.value })}
+                    className="flex-1 min-w-[140px] border border-slate-200 rounded-lg px-2 py-1"
+                  />
+                  <input
+                    type="number"
+                    value={chore.points}
+                    onChange={(e) => updateChore(chore.id, { points: Number(e.target.value) })}
+                    className="w-20 border border-slate-200 rounded-lg px-2 py-1"
+                    title="Points"
+                  />
+                  <DayToggles days={chore.days_of_week} onChange={(days) => updateChore(chore.id, { days_of_week: days })} />
+                  <button onClick={() => deleteChore(chore.id)} className="text-red-500 text-sm ml-auto">
+                    Delete
+                  </button>
+                </div>
                 <input
-                  value={chore.icon}
-                  onChange={(e) => updateChore(chore.id, { icon: e.target.value })}
-                  className="w-10 text-center border border-slate-200 rounded-lg py-1"
+                  value={chore.voice_line ?? ""}
+                  onChange={(e) => updateChore(chore.id, { voice_line: e.target.value || null })}
+                  placeholder="🔊 Voice line read aloud (blank = reads the title instead)"
+                  className="w-full border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-600"
                 />
-                <input
-                  value={chore.title}
-                  onChange={(e) => updateChore(chore.id, { title: e.target.value })}
-                  className="flex-1 min-w-[140px] border border-slate-200 rounded-lg px-2 py-1"
-                />
-                <input
-                  type="number"
-                  value={chore.points}
-                  onChange={(e) => updateChore(chore.id, { points: Number(e.target.value) })}
-                  className="w-20 border border-slate-200 rounded-lg px-2 py-1"
-                  title="Points"
-                />
-                <DayToggles days={chore.days_of_week} onChange={(days) => updateChore(chore.id, { days_of_week: days })} />
-                <button onClick={() => deleteChore(chore.id)} className="text-red-500 text-sm ml-auto">
-                  Delete
-                </button>
               </div>
             ))}
             <button onClick={addChore} className="text-brand-600 font-medium text-sm">

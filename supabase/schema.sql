@@ -32,9 +32,15 @@ create table if not exists schedule_items (
   icon text not null default '⏰',
   category text not null default 'routine'
     check (category in ('routine', 'school', 'meal', 'chore', 'play', 'sleep')),
+  -- Spoken narration for kids who can't read yet — a tap-to-hear button reads
+  -- this aloud via the browser's speech synthesis. Falls back to `title` when
+  -- null (e.g. an item a parent just added from Admin with no line yet).
+  voice_line text,
   sort_order int not null default 0,
   created_at timestamptz not null default now()
 );
+
+alter table schedule_items add column if not exists voice_line text;
 
 create index if not exists schedule_items_member_idx on schedule_items(family_member_id);
 
@@ -48,9 +54,12 @@ create table if not exists chores (
   icon text not null default '🧹',
   points int not null default 5,
   days_of_week int[] not null default '{0,1,2,3,4,5,6}',
+  voice_line text,
   sort_order int not null default 0,
   created_at timestamptz not null default now()
 );
+
+alter table chores add column if not exists voice_line text;
 
 create index if not exists chores_member_idx on chores(family_member_id);
 
