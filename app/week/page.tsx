@@ -47,8 +47,6 @@ export default function WeekPage() {
   if (!isSupabaseConfigured) return <SetupNotice />;
   if (loading) return <p className="text-center text-slate-400 mt-12">Loading week...</p>;
 
-  const memberById = Object.fromEntries(members.map((m) => [m.id, m]));
-
   return (
     <div>
       <motion.h1
@@ -103,26 +101,38 @@ export default function WeekPage() {
                 {name}
                 {isToday && <span className="ml-1 text-xs font-medium">(today)</span>}
               </p>
-              <ul className="space-y-2">
-                {dayItems.map((item) => {
-                  const member = memberById[item.family_member_id];
+              <div className="space-y-3">
+                {members.map((member) => {
+                  const memberItems = dayItems.filter((i) => i.family_member_id === member.id);
+                  if (memberItems.length === 0) return null;
                   return (
-                    <li
-                      key={item.id}
-                      className="rounded-lg px-2 py-1.5 text-xs bg-slate-50 border-l-4"
-                      style={{ borderLeftColor: member?.color ?? "#94a3b8" }}
-                    >
-                      <p className="font-semibold text-slate-800 truncate">
-                        {item.icon} {item.title}
+                    <div key={member.id}>
+                      <p
+                        className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide mb-1.5"
+                        style={{ color: member.color }}
+                      >
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: member.color }} />
+                        {member.avatar_emoji} {member.name}
                       </p>
-                      <p className="text-slate-400">
-                        {formatTime(item.start_time)} · {member?.avatar_emoji} {member?.name}
-                      </p>
-                    </li>
+                      <ul className="space-y-1.5">
+                        {memberItems.map((item) => (
+                          <li
+                            key={item.id}
+                            className="rounded-lg px-2 py-1.5 text-xs bg-slate-50 border-l-4"
+                            style={{ borderLeftColor: member.color }}
+                          >
+                            <p className="font-semibold text-slate-800 truncate">
+                              {item.icon} {item.title}
+                            </p>
+                            <p className="text-slate-400">{formatTime(item.start_time)}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   );
                 })}
-                {dayItems.length === 0 && <li className="text-slate-300 text-xs">Nothing scheduled</li>}
-              </ul>
+                {dayItems.length === 0 && <p className="text-slate-300 text-xs">Nothing scheduled</p>}
+              </div>
             </motion.div>
           );
         })}
