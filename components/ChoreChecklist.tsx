@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, Variants } from "framer-motion";
 import { Chore } from "@/lib/types";
 import { burstAt } from "@/lib/celebrate";
+import SpeakButton from "@/components/SpeakButton";
 
 const listVariants: Variants = {
   hidden: {},
@@ -40,12 +41,12 @@ export default function ChoreChecklist({
       {chores.map((chore) => {
         const done = completedIds.has(chore.id);
         return (
-          <motion.li key={chore.id} variants={itemVariants} layout>
+          <motion.li key={chore.id} variants={itemVariants} layout className="flex items-stretch gap-2">
             <motion.button
               onClick={(e) => handleClick(e, chore, done)}
               whileTap={{ scale: 0.95 }}
               whileHover={{ scale: 1.02 }}
-              className={`w-full flex items-center gap-3 rounded-2xl border p-4 text-left transition-colors ${
+              className={`flex-1 flex items-center gap-3 rounded-2xl border p-4 text-left transition-colors ${
                 done
                   ? "bg-emerald-50 border-emerald-300"
                   : "bg-white border-slate-200 hover:border-slate-300"
@@ -83,6 +84,9 @@ export default function ChoreChecklist({
                 <span className="text-amber-600 text-sm font-medium">+{chore.points} pts</span>
               </span>
             </motion.button>
+            <div className="flex items-center">
+              <SpeakButton text={chore.voice_line || chore.title} large={large} />
+            </div>
           </motion.li>
         );
       })}

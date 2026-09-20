@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, Variants } from "framer-motion";
 import { CATEGORY_STYLES, ScheduleItem } from "@/lib/types";
 import { formatTime, nowMinutes, timeToMinutes } from "@/lib/date";
+import SpeakButton from "@/components/SpeakButton";
 
 const listVariants: Variants = {
   hidden: {},
@@ -80,6 +81,7 @@ export default function ScheduleTimeline({
                 {formatTime(item.start_time)} – {formatTime(item.end_time)}
               </p>
             </div>
+            <SpeakButton text={item.voice_line || item.title} large={large} />
             {isNow && (
               <motion.span
                 animate={{ scale: [1, 1.08, 1] }}

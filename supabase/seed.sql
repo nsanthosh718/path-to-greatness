@@ -221,3 +221,120 @@ from (values
   ('Special Outing', '🎡', 200, 6)
 ) as t(title, icon, points_cost, sort_order)
 where not exists (select 1 from rewards where family_member_id is null);
+
+-- ---------------------------------------------------------------------------
+-- Voice lines: spoken narration read aloud by a tap-to-hear button in the
+-- app, since Nirva can't read yet. Matched by title, so every occurrence of
+-- a repeated title (e.g. "Dinner" showing up on several different days)
+-- picks up the same line from one statement.
+-- ---------------------------------------------------------------------------
+with kid as (select id from family_members where slug = 'nirva')
+update schedule_items si set voice_line = v.voice_line
+from kid, (values
+  ('Wake Up & Get Ready for Bus', 'Good morning, sunshine! Time to wake up, get dressed, and get ready for the school bus.'),
+  ('School', 'Off to school! Have a wonderful day and learn lots of new things.'),
+  ('Snack Time', 'Welcome home! Let''s have a yummy snack.'),
+  ('Chore Time', 'Time to help out! Let''s do your chores together.'),
+  ('Reading Time', 'Story time! Let''s read a book together.'),
+  ('Drawing', 'Time to be an artist! Let''s draw something colorful.'),
+  ('Math Practice', 'Let''s practice some fun math!'),
+  ('Music Practice', 'Time to make some music!'),
+  ('Free Play', 'Yay, free play time! You can play with anything you like.'),
+  ('Swimming', 'Time for swimming! Grab your swimsuit, it''s pool time.'),
+  ('Wind Down', 'Great swimming! Let''s dry off and relax for a bit.'),
+  ('Soccer Practice', 'Time for soccer practice! Let''s go kick the ball.'),
+  ('Dinner', 'Dinner time! Let''s wash your hands and come eat.'),
+  ('Bath Time', 'Splish splash! Time for your bath.'),
+  ('Family / Story Time', 'Let''s snuggle up for family and story time.'),
+  ('Bedtime Routine', 'Time to get ready for bed. Brush your teeth and put on your pajamas.'),
+  ('Lights Out', 'Lights out! Sweet dreams, see you in the morning.'),
+  ('Wake Up', 'Good morning! Time to wake up and start your day.'),
+  ('Breakfast', 'Breakfast time! Let''s eat something yummy.'),
+  ('Cartoons / Screen Time', 'Time to relax and watch something fun.'),
+  ('Family Time / Outing', 'Let''s go have some fun family time together!'),
+  ('Lunch', 'Lunch time! Let''s eat and refuel.'),
+  ('Quiet Time / Nap', 'Time for some quiet rest. Close your eyes and relax.'),
+  ('Play / Activities', 'Time for fun activities! What do you want to do?'),
+  ('Snack', 'Snack time! Let''s have a little bite.'),
+  ('Family Time', 'Let''s spend some fun time together as a family.'),
+  ('Screen Time / Free Play', 'Time to relax with screen time or free play.'),
+  ('Story / Reading Time', 'Let''s read a story together.')
+) as v(title, voice_line)
+where si.family_member_id = kid.id and si.title = v.title;
+
+with kid as (select id from family_members where slug = 'aadhi')
+update schedule_items si set voice_line = v.voice_line
+from kid, (values
+  ('Wake Up', 'Good morning, champ! Time to get up and start the day.'),
+  ('Breakfast', 'Breakfast time! Fuel up for the day ahead.'),
+  ('Get Ready & Pack Backpack', 'Time to get ready and pack your backpack for school.'),
+  ('School', 'Off to school! Have a great day.'),
+  ('Snack & Unwind', 'Welcome home! Grab a snack and take a breather.'),
+  ('Chores', 'Time to knock out your chores.'),
+  ('Homework', 'Homework time! Let''s get it done.'),
+  ('Soccer: Home Session A', 'Time for your home training session! Bring your best effort.'),
+  ('Soccer: Club Practice', 'Time for club practice! Give it everything you''ve got.'),
+  ('Soccer: Home Session B', 'Time for your home training session! Focus and have fun.'),
+  ('Soccer: Home Session C', 'Time for your home training session! Finish the week strong.'),
+  ('Dinner', 'Dinner time! Let''s eat and recharge.'),
+  ('Mind & Recovery Check-In', 'Time to check in on your mind and recovery habits.'),
+  ('Screen Time / Reading', 'Time to relax with some screen time or reading.'),
+  ('Get Ready for Bed', 'Time to get ready for bed.'),
+  ('Reading in Bed', 'Time for some quiet reading in bed.'),
+  ('Lights Out', 'Lights out! Rest up, big day tomorrow.'),
+  ('Game Day (check Blue Tracker for time)', 'It''s game day! Check Blue Tracker for the exact time and get ready to play.'),
+  ('Post-Game Recovery & Snack', 'Great game! Time to refuel and recover.'),
+  ('Free Time / Family', 'Enjoy some free time with the family.'),
+  ('Family Movie / Game Night', 'Time for family movie or game night!'),
+  ('Free Play / Family Outing', 'Time for free play or a family outing.'),
+  ('Lunch', 'Lunch time! Let''s eat.'),
+  ('Free Time / Hobbies', 'Time for your hobbies and free time.'),
+  ('Family Outing / Playdate', 'Time for a family outing or a playdate.'),
+  ('Free Time', 'Enjoy some free time.'),
+  ('Drawing', 'Time to draw something creative!'),
+  ('Music Practice', 'Time to practice music!'),
+  ('Reading', 'Time for some reading.'),
+  ('Math Practice', 'Time to practice some math.')
+) as v(title, voice_line)
+where si.family_member_id = kid.id and si.title = v.title;
+
+with kid as (select id from family_members where slug = 'nirva')
+update chores c set voice_line = v.voice_line
+from kid, (values
+  ('Make Bed', 'Let''s make your bed nice and tidy!'),
+  ('Put Away Toys', 'Time to put your toys away!'),
+  ('Feed the Pet', 'Don''t forget to feed your pet!'),
+  ('Dirty Clothes in Hamper', 'Put your dirty clothes in the hamper, please!')
+) as v(title, voice_line)
+where c.family_member_id = kid.id and c.title = v.title;
+
+with kid as (select id from family_members where slug = 'aadhi')
+update chores c set voice_line = v.voice_line
+from kid, (values
+  ('Make Bed', 'Make your bed to start the day right.'),
+  ('Load / Unload Dishwasher', 'Time to load or unload the dishwasher.'),
+  ('Take Out Trash', 'Take out the trash, please.'),
+  ('Tidy Room', 'Let''s tidy up your room.'),
+  ('Pack Backpack & Lunch', 'Pack your backpack and lunch for tomorrow.'),
+  ('Homework Check-In', 'Check in: is your homework all done?'),
+  ('Positive Self-Talk', 'Remember to use positive self-talk today.'),
+  ('Reflect on Today''s Session', 'Take a moment to reflect on today''s session.'),
+  ('Hydrate & Refuel After Training', 'Don''t forget to hydrate and refuel after training.'),
+  ('Visualize Before Training', 'Take a moment to visualize before training.')
+) as v(title, voice_line)
+where c.family_member_id = kid.id and c.title = v.title;
+
+-- Shared bonus chores: same wording works for both kids, so match by title
+-- only (no member filter) to cover both rows in one statement.
+update chores c set voice_line = v.voice_line
+from (values
+  ('Laundry', 'Time to help with the laundry!'),
+  ('Run the Dishwasher (Full Load)', 'Let''s run a full load in the dishwasher.'),
+  ('Clean Up Clothes', 'Let''s clean up and put away your clothes.'),
+  ('Arrange the Shoes', 'Time to line up all the shoes neatly.'),
+  ('Keep Floors Spotless (Pick Up Litter)', 'Let''s pick up litter and keep the floors spotless.'),
+  ('Clean Up Toys Before Bed', 'Time to clean up your toys before bed.'),
+  ('Rinse & Load Dishes Right After Eating', 'Please rinse your dishes and load them right after eating.'),
+  ('Keep Sofa Clean Before Leaving Living Area', 'Let''s keep the sofa clean before you leave the living room.')
+) as v(title, voice_line)
+where c.title = v.title;
