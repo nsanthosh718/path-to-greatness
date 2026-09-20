@@ -1,43 +1,64 @@
--- FamilyBoard seed data: a draft daily-schedule template for a 5-year-old
--- and a 10-year-old. Run AFTER schema.sql, once. Everything here is meant
--- to be edited: rename the kids, and adjust times/chores/rewards from the
--- Admin screen (or directly in these tables) to match real school hours,
--- activities, and house rules.
+-- FamilyBoard seed data for Aadhi and Nirva.
+--
+-- Safe to re-run after edits: it deletes any prior rows for these two kids
+-- (by slug) before re-inserting, so tweaking this file and re-running it in
+-- the Supabase SQL editor won't pile up duplicates. NOTE: because of that
+-- delete-then-insert, re-running this AFTER the family has started actually
+-- using the app will also wipe that kid's chore-completion history and point
+-- balance back to zero — fine during setup, not something to run casually
+-- once you're relying on the points/rewards history. Global rewards
+-- (available to "Everyone") are untouched either way.
+--
+-- Aadhi's soccer schedule below mirrors the weekly rhythm from his own
+-- training tracker (github.com/nsanthosh718/path-to-mls, "Blue Tracker"):
+-- Mon/Wed/Fri home sessions (A/B/C), Tue/Thu club practice, Sat game day,
+-- Sun fully protected (no soccer). The specific drill content for each
+-- session lives in that app, not here — this just blocks out the time and
+-- mirrors a few of its daily mental-habit/recovery checklist items as chores.
+
+delete from family_members where slug in ('five', 'ten', 'aadhi', 'nirva');
 
 -- ---------------------------------------------------------------------------
 -- Family members
 -- ---------------------------------------------------------------------------
 insert into family_members (slug, name, age, role, avatar_emoji, color, sort_order)
 values
-  ('five', 'Age 5', 5, 'kid', '🦖', '#f472b6', 1),
-  ('ten', 'Age 10', 10, 'kid', '🚀', '#38bdf8', 2)
-on conflict (slug) do nothing;
+  ('nirva', 'Nirva', 5, 'kid', '🦋', '#f472b6', 1),
+  ('aadhi', 'Aadhi', 10, 'kid', '⚽', '#38bdf8', 2);
 
 -- ---------------------------------------------------------------------------
--- Schedule: Age 5 — weekday (Mon-Fri = 1,2,3,4,5)
+-- Schedule: Nirva — weekday (Mon-Fri)
+-- Wake 6:15, bus-ready 6:50, back from school 2:35, bed by 9pm.
+-- Daily reading, plus drawing/math/music rotating Mon/Wed/Fri; swim Tue,
+-- soccer Thu.
 -- ---------------------------------------------------------------------------
-with kid as (select id from family_members where slug = 'five')
+with kid as (select id from family_members where slug = 'nirva')
 insert into schedule_items (family_member_id, days_of_week, start_time, end_time, title, icon, category, sort_order)
 select kid.id, days, start_time, end_time, title, icon, category, sort_order
 from kid, (values
-  ('{1,2,3,4,5}'::int[], '06:30'::time, '07:00'::time, 'Wake Up & Get Dressed', '🌞', 'routine', 1),
-  ('{1,2,3,4,5}', '07:00', '07:30', 'Breakfast', '🥣', 'meal', 2),
-  ('{1,2,3,4,5}', '07:30', '07:45', 'Brush Teeth', '🪥', 'routine', 3),
-  ('{1,2,3,4,5}', '08:00', '15:00', 'School', '🏫', 'school', 4),
-  ('{1,2,3,4,5}', '15:00', '15:30', 'Snack Time', '🍎', 'meal', 5),
-  ('{1,2,3,4,5}', '15:30', '16:00', 'Free Play', '🧸', 'play', 6),
-  ('{1,2,3,4,5}', '16:00', '16:20', 'Chore Time', '🧹', 'chore', 7),
-  ('{1,2,3,4,5}', '16:20', '17:00', 'Reading & Learning Time', '📚', 'school', 8),
-  ('{1,2,3,4,5}', '17:00', '17:45', 'Outside Play', '🌳', 'play', 9),
-  ('{1,2,3,4,5}', '17:45', '18:15', 'Screen Time', '📺', 'play', 10),
-  ('{1,2,3,4,5}', '18:15', '18:45', 'Dinner', '🍽️', 'meal', 11),
-  ('{1,2,3,4,5}', '18:45', '19:15', 'Bath Time', '🛁', 'routine', 12),
-  ('{1,2,3,4,5}', '19:15', '19:35', 'Story Time', '📖', 'routine', 13),
-  ('{1,2,3,4,5}', '19:35', '19:45', 'Lights Out', '🌙', 'sleep', 14)
+  ('{1,2,3,4,5}'::int[], '06:15'::time, '06:50'::time, 'Wake Up & Get Ready for Bus', '🌞', 'routine', 1),
+  ('{1,2,3,4,5}', '06:50', '14:35', 'School', '🏫', 'school', 2),
+  ('{1,2,3,4,5}', '14:35', '15:00', 'Snack Time', '🍎', 'meal', 3),
+  ('{1,2,3,4,5}', '15:00', '15:20', 'Chore Time', '🧹', 'chore', 4),
+  ('{1,2,3,4,5}', '15:20', '15:50', 'Reading Time', '📖', 'school', 5),
+  ('{1}', '15:50', '16:20', 'Drawing', '🎨', 'play', 6),
+  ('{3}', '15:50', '16:20', 'Math Practice', '✏️', 'school', 6),
+  ('{5}', '15:50', '16:20', 'Music Practice', '🎵', 'play', 6),
+  ('{1,3,5}', '16:20', '18:00', 'Free Play', '🧸', 'play', 7),
+  ('{2}', '15:50', '17:00', 'Free Play', '🧸', 'play', 7),
+  ('{2}', '17:00', '17:30', 'Swimming', '🏊', 'play', 8),
+  ('{2}', '17:30', '18:30', 'Wind Down', '🧸', 'play', 9),
+  ('{4}', '15:50', '17:30', 'Free Play', '🧸', 'play', 7),
+  ('{4}', '17:30', '18:30', 'Soccer Practice', '⚽', 'play', 8),
+  ('{1,2,3,4,5}', '18:30', '19:00', 'Dinner', '🍽️', 'meal', 10),
+  ('{1,2,3,4,5}', '19:00', '19:30', 'Bath Time', '🛁', 'routine', 11),
+  ('{1,2,3,4,5}', '19:30', '20:30', 'Family / Story Time', '📖', 'routine', 12),
+  ('{1,2,3,4,5}', '20:30', '20:50', 'Bedtime Routine', '🌙', 'routine', 13),
+  ('{1,2,3,4,5}', '20:50', '21:00', 'Lights Out', '🌙', 'sleep', 14)
 ) as t(days, start_time, end_time, title, icon, category, sort_order);
 
--- Schedule: Age 5 — weekend (Sat/Sun = 6,0)
-with kid as (select id from family_members where slug = 'five')
+-- Schedule: Nirva — weekend (Sat/Sun), bedtime aligned to the same 9pm.
+with kid as (select id from family_members where slug = 'nirva')
 insert into schedule_items (family_member_id, days_of_week, start_time, end_time, title, icon, category, sort_order)
 select kid.id, days, start_time, end_time, title, icon, category, sort_order
 from kid, (values
@@ -52,17 +73,19 @@ from kid, (values
   ('{0,6}', '15:30', '16:00', 'Snack', '🍎', 'meal', 9),
   ('{0,6}', '16:00', '17:00', 'Family Time', '👨‍👩‍👧', 'play', 10),
   ('{0,6}', '17:00', '17:30', 'Chore Time', '🧹', 'chore', 11),
-  ('{0,6}', '17:30', '18:00', 'Screen Time', '📺', 'play', 12),
-  ('{0,6}', '18:00', '18:30', 'Dinner', '🍽️', 'meal', 13),
-  ('{0,6}', '18:30', '19:00', 'Bath Time', '🛁', 'routine', 14),
-  ('{0,6}', '19:00', '19:30', 'Story Time', '📖', 'routine', 15),
-  ('{0,6}', '19:30', '19:45', 'Lights Out', '🌙', 'sleep', 16)
+  ('{0,6}', '17:30', '18:30', 'Screen Time / Free Play', '📺', 'play', 12),
+  ('{0,6}', '18:30', '19:00', 'Dinner', '🍽️', 'meal', 13),
+  ('{0,6}', '19:00', '19:30', 'Bath Time', '🛁', 'routine', 14),
+  ('{0,6}', '19:30', '20:30', 'Story / Reading Time', '📖', 'routine', 15),
+  ('{0,6}', '20:30', '20:50', 'Bedtime Routine', '🌙', 'routine', 16),
+  ('{0,6}', '20:50', '21:00', 'Lights Out', '🌙', 'sleep', 17)
 ) as t(days, start_time, end_time, title, icon, category, sort_order);
 
 -- ---------------------------------------------------------------------------
--- Schedule: Age 10 — weekday
+-- Schedule: Aadhi — weekday. Homework/school as before; the old generic
+-- "Sports / Free Play" slot is now his real Blue Tracker weekly rhythm.
 -- ---------------------------------------------------------------------------
-with kid as (select id from family_members where slug = 'ten')
+with kid as (select id from family_members where slug = 'aadhi')
 insert into schedule_items (family_member_id, days_of_week, start_time, end_time, title, icon, category, sort_order)
 select kid.id, days, start_time, end_time, title, icon, category, sort_order
 from kid, (values
@@ -73,39 +96,63 @@ from kid, (values
   ('{1,2,3,4,5}', '15:00', '15:30', 'Snack & Unwind', '🍎', 'meal', 5),
   ('{1,2,3,4,5}', '15:30', '16:00', 'Chores', '🧹', 'chore', 6),
   ('{1,2,3,4,5}', '16:00', '17:00', 'Homework', '✏️', 'school', 7),
-  ('{1,2,3,4,5}', '17:00', '18:00', 'Sports / Activity / Free Play', '⚽', 'play', 8),
+  ('{1}', '17:00', '18:00', 'Soccer: Home Session A', '⚽', 'play', 8),
+  ('{2}', '17:00', '18:00', 'Soccer: Club Practice', '⚽', 'play', 8),
+  ('{3}', '17:00', '18:00', 'Soccer: Home Session B', '⚽', 'play', 8),
+  ('{4}', '17:00', '18:00', 'Soccer: Club Practice', '⚽', 'play', 8),
+  ('{5}', '17:00', '18:00', 'Soccer: Home Session C', '⚽', 'play', 8),
   ('{1,2,3,4,5}', '18:00', '18:30', 'Dinner', '🍽️', 'meal', 9),
-  ('{1,2,3,4,5}', '18:30', '19:30', 'Screen Time / Reading', '🎮', 'play', 10),
-  ('{1,2,3,4,5}', '19:30', '20:00', 'Get Ready for Bed', '🪥', 'routine', 11),
-  ('{1,2,3,4,5}', '20:00', '20:30', 'Reading in Bed', '📖', 'routine', 12),
-  ('{1,2,3,4,5}', '20:30', '20:45', 'Lights Out', '🌙', 'sleep', 13)
+  ('{1,2,3,4,5}', '18:30', '19:00', 'Mind & Recovery Check-In', '🧠', 'routine', 10),
+  ('{1,2,3,4,5}', '19:00', '19:30', 'Screen Time / Reading', '🎮', 'play', 11),
+  ('{1,2,3,4,5}', '19:30', '20:00', 'Get Ready for Bed', '🪥', 'routine', 12),
+  ('{1,2,3,4,5}', '20:00', '20:30', 'Reading in Bed', '📖', 'routine', 13),
+  ('{1,2,3,4,5}', '20:30', '20:45', 'Lights Out', '🌙', 'sleep', 14)
 ) as t(days, start_time, end_time, title, icon, category, sort_order);
 
--- Schedule: Age 10 — weekend
-with kid as (select id from family_members where slug = 'ten')
+-- Schedule: Aadhi — Saturday (game day) and Sunday (protected free day,
+-- where the drawing/music/math/reading activities land since weekdays are
+-- already full with school + soccer + homework).
+with kid as (select id from family_members where slug = 'aadhi')
 insert into schedule_items (family_member_id, days_of_week, start_time, end_time, title, icon, category, sort_order)
 select kid.id, days, start_time, end_time, title, icon, category, sort_order
 from kid, (values
-  ('{0,6}'::int[], '08:00'::time, '08:30'::time, 'Wake Up', '🌞', 'routine', 1),
-  ('{0,6}', '08:30', '09:00', 'Breakfast', '🥣', 'meal', 2),
-  ('{0,6}', '09:00', '10:00', 'Chores', '🧹', 'chore', 3),
-  ('{0,6}', '10:00', '12:00', 'Activities / Sports / Free Time', '⚽', 'play', 4),
-  ('{0,6}', '12:00', '12:30', 'Lunch', '🍽️', 'meal', 5),
-  ('{0,6}', '12:30', '14:30', 'Free Time / Hobbies', '🎨', 'play', 6),
-  ('{0,6}', '14:30', '16:30', 'Family Outing / Playdate', '🚴', 'play', 7),
-  ('{0,6}', '16:30', '17:00', 'Snack', '🍎', 'meal', 8),
-  ('{0,6}', '17:00', '18:00', 'Free Time', '🎮', 'play', 9),
-  ('{0,6}', '18:00', '18:30', 'Dinner', '🍽️', 'meal', 10),
-  ('{0,6}', '18:30', '20:00', 'Family Movie / Game Night', '🎬', 'play', 11),
-  ('{0,6}', '20:00', '20:30', 'Get Ready for Bed', '🪥', 'routine', 12),
-  ('{0,6}', '20:30', '21:00', 'Reading', '📖', 'routine', 13),
-  ('{0,6}', '21:00', '21:15', 'Lights Out', '🌙', 'sleep', 14)
+  ('{6}'::int[], '08:00'::time, '08:30'::time, 'Wake Up', '🌞', 'routine', 1),
+  ('{6}', '08:30', '09:00', 'Breakfast', '🥣', 'meal', 2),
+  ('{6}', '09:00', '11:00', 'Game Day (check Blue Tracker for time)', '⚽', 'play', 3),
+  ('{6}', '11:00', '12:00', 'Post-Game Recovery & Snack', '🍎', 'meal', 4),
+  ('{6}', '12:00', '17:00', 'Free Time / Family', '🎮', 'play', 5),
+  ('{6}', '17:00', '17:30', 'Chores', '🧹', 'chore', 6),
+  ('{6}', '17:30', '18:00', 'Mind & Recovery Check-In', '🧠', 'routine', 7),
+  ('{6}', '18:00', '18:30', 'Dinner', '🍽️', 'meal', 8),
+  ('{6}', '18:30', '20:00', 'Family Movie / Game Night', '🎬', 'play', 9),
+  ('{6}', '20:00', '20:30', 'Get Ready for Bed', '🪥', 'routine', 10),
+  ('{6}', '20:30', '21:00', 'Reading', '📖', 'routine', 11),
+  ('{6}', '21:00', '21:15', 'Lights Out', '🌙', 'sleep', 12),
+
+  ('{0}', '08:00', '08:30', 'Wake Up', '🌞', 'routine', 1),
+  ('{0}', '08:30', '09:00', 'Breakfast', '🥣', 'meal', 2),
+  ('{0}', '09:00', '09:30', 'Chores', '🧹', 'chore', 3),
+  ('{0}', '09:30', '10:00', 'Drawing', '🎨', 'play', 4),
+  ('{0}', '10:00', '10:30', 'Music Practice', '🎵', 'play', 5),
+  ('{0}', '10:30', '11:00', 'Reading', '📖', 'school', 6),
+  ('{0}', '11:00', '12:00', 'Free Play / Family Outing', '🚴', 'play', 7),
+  ('{0}', '12:00', '12:30', 'Lunch', '🍽️', 'meal', 8),
+  ('{0}', '12:30', '14:30', 'Free Time / Hobbies', '🎨', 'play', 9),
+  ('{0}', '14:30', '15:00', 'Math Practice', '✏️', 'school', 10),
+  ('{0}', '15:00', '17:00', 'Family Outing / Playdate', '🚴', 'play', 11),
+  ('{0}', '17:00', '18:00', 'Free Time', '🎮', 'play', 12),
+  ('{0}', '18:00', '18:30', 'Dinner', '🍽️', 'meal', 13),
+  ('{0}', '18:30', '20:00', 'Family Movie / Game Night', '🎬', 'play', 14),
+  ('{0}', '20:00', '20:30', 'Get Ready for Bed', '🪥', 'routine', 15),
+  ('{0}', '20:30', '21:00', 'Reading', '📖', 'routine', 16),
+  ('{0}', '21:00', '21:15', 'Lights Out', '🌙', 'sleep', 17)
 ) as t(days, start_time, end_time, title, icon, category, sort_order);
 
 -- ---------------------------------------------------------------------------
--- Chores
+-- Chores: regular daily chores (unchanged point tiers from the original
+-- draft — 5 pts for Nirva, 10 pts for Aadhi)
 -- ---------------------------------------------------------------------------
-with kid as (select id from family_members where slug = 'five')
+with kid as (select id from family_members where slug = 'nirva')
 insert into chores (family_member_id, title, icon, points, days_of_week, sort_order)
 select kid.id, title, icon, points, '{0,1,2,3,4,5,6}'::int[], sort_order
 from kid, (values
@@ -115,7 +162,7 @@ from kid, (values
   ('Dirty Clothes in Hamper', '👕', 5, 4)
 ) as t(title, icon, points, sort_order);
 
-with kid as (select id from family_members where slug = 'ten')
+with kid as (select id from family_members where slug = 'aadhi')
 insert into chores (family_member_id, title, icon, points, days_of_week, sort_order)
 select kid.id, title, icon, points, '{0,1,2,3,4,5,6}'::int[], sort_order
 from kid, (values
@@ -127,14 +174,50 @@ from kid, (values
   ('Homework Check-In', '✅', 10, 6)
 ) as t(title, icon, points, sort_order);
 
+-- Aadhi's Mind & Recovery habits, mirrored from Blue Tracker's daily
+-- checklist (a representative subset — the full list also has RESET-after-
+-- a-mistake, in-session hydration, and sleep hours, which fit a habit-streak
+-- tracker better than a one-tap chore; ask if you want those added too).
+-- Runs on training/game days (Mon-Sat), not Sunday's protected rest day.
+with kid as (select id from family_members where slug = 'aadhi')
+insert into chores (family_member_id, title, icon, points, days_of_week, sort_order)
+select kid.id, title, icon, points, '{1,2,3,4,5,6}'::int[], sort_order
+from kid, (values
+  ('Positive Self-Talk', '🗣️', 10, 7),
+  ('Reflect on Today''s Session', '📝', 10, 8),
+  ('Hydrate & Refuel After Training', '⚡', 10, 9),
+  ('Visualize Before Training', '🧠', 10, 10)
+) as t(title, icon, points, sort_order);
+
 -- ---------------------------------------------------------------------------
--- Rewards catalog (available to every kid)
+-- Bonus chores — "extra stars": worth more than the regular daily chores
+-- above, available to both kids, any day.
+-- ---------------------------------------------------------------------------
+with kid as (select id from family_members where slug in ('nirva', 'aadhi'))
+insert into chores (family_member_id, title, icon, points, days_of_week, sort_order)
+select kid.id, title, icon, points, '{0,1,2,3,4,5,6}'::int[], sort_order
+from kid, (values
+  ('Laundry', '🧺', 15, 20),
+  ('Run the Dishwasher (Full Load)', '🍽️', 15, 21),
+  ('Clean Up Clothes', '👕', 15, 22),
+  ('Arrange the Shoes', '👟', 15, 23),
+  ('Keep Floors Spotless (Pick Up Litter)', '🧹', 15, 24),
+  ('Clean Up Toys Before Bed', '🧸', 15, 25),
+  ('Rinse & Load Dishes Right After Eating', '⏱️', 15, 26),
+  ('Keep Sofa Clean Before Leaving Living Area', '🛋️', 15, 27)
+) as t(title, icon, points, sort_order);
+
+-- ---------------------------------------------------------------------------
+-- Rewards catalog (available to every kid) — unchanged
 -- ---------------------------------------------------------------------------
 insert into rewards (family_member_id, title, icon, points_cost, sort_order)
-values
-  (null, 'Extra 30 Min Screen Time', '📱', 30, 1),
-  (null, 'Stay Up 30 Min Late', '🌙', 40, 2),
-  (null, 'Pick the Family Movie', '🎬', 50, 3),
-  (null, 'Choose Dinner Tonight', '🍕', 60, 4),
-  (null, 'Small Treat or Toy', '🎁', 100, 5),
-  (null, 'Special Outing', '🎡', 200, 6);
+select null, title, icon, points_cost, sort_order
+from (values
+  ('Extra 30 Min Screen Time', '📱', 30, 1),
+  ('Stay Up 30 Min Late', '🌙', 40, 2),
+  ('Pick the Family Movie', '🎬', 50, 3),
+  ('Choose Dinner Tonight', '🍕', 60, 4),
+  ('Small Treat or Toy', '🎁', 100, 5),
+  ('Special Outing', '🎡', 200, 6)
+) as t(title, icon, points_cost, sort_order)
+where not exists (select 1 from rewards where family_member_id is null);
